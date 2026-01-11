@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const { sequelize } = require('./models');
 
 const app = express();
-const PORT = process.env.PORT || 3009;
+const PORT = process.env.PORT || 3000;
 
 // ===== MIDDLEWARE =====
 app.use(helmet()); // Security headers
@@ -17,7 +17,16 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded body
 
 // ===== ROUTES =====
 const iotRoutes = require('./routes/iot');
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const deviceRoutes = require('./routes/devices');
+const notificationRoutes = require('./routes/notifications');
+
 app.use('/api/iot', iotRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/devices', deviceRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

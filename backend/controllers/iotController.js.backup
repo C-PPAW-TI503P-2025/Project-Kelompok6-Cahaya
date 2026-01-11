@@ -304,38 +304,18 @@ const iotController = {
                 order: [['createdAt', 'DESC']]
             });
 
-            if (!latestData) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Tidak ada data sensor. Tunggu ESP32 mengirim data pertama.'
-                });
-            }
+            const settings = {
+                mode: mode ? mode.toLowerCase() : (latestData?.mode || 'auto'),
+                threshold_low: threshold || latestData?.threshold_low || 100,
+                manual_relay_state: manual_relay_state !== undefined ? manual_relay_state : (latestData?.manual_relay_state || false)
+            };
 
-            // Prepare updated settings
-            const newMode = mode ? mode.toLowerCase() : latestData.mode;
-            const newThreshold = threshold !== undefined ? threshold : latestData.threshold_low;
-            const newManualRelayState = manual_relay_state !== undefined ? manual_relay_state : latestData.manual_relay_state;
-
-            // Create new record with updated settings
-            const updatedData = await SensorData.create({
-                lux: latestData.lux,
-                relay_status: newMode === 'manual' ? newManualRelayState : latestData.relay_status,
-                mode: newMode,
-                threshold_low: newThreshold,
-                threshold_high: latestData.threshold_high || 500,
-                manual_relay_state: newManualRelayState
-            });
-
-            console.log(`⚙️ Settings updated: Mode=${newMode}, Threshold=${newThreshold}, Manual=${newManualRelayState}`);
+            console.log(`⚙️ Settings updated: Mode=${settings.mode}, Threshold=${settings.threshold_low}, Manual=${settings.manual_relay_state}`);
 
             return res.status(200).json({
                 success: true,
                 message: 'Settings berhasil diupdate',
-                data: {
-                    mode: updatedData.mode,
-                    lux_threshold: updatedData.threshold_low,
-                    manual_relay_state: updatedData.manual_relay_state
-                }
+                data: settings
             });
 
         } catch (error) {
@@ -393,139 +373,6 @@ const iotController = {
             return res.status(500).json({
                 success: false,
                 message: 'Terjadi kesalahan saat kontrol relay',
-                error: error.message
-            });
-        }
-    },
-
-    /**
-     * Get statistics summary
-     * GET /api/iot/statistics
-     */
-    async getStatistics(req, res) {
-        try {
-            const { startDate, endDate } = req.query;
-
-            const whereClause = {};
-            if (startDate && endDate) {
-                whereClause.createdAt = {
-                    [Op.between]: [new Date(startDate), new Date(endDate)]
-                };
-            }
-
-            const data = await SensorData.findAll({
-                where: whereClause,
-                order: [['createdAt', 'DESC']]
-            });
-
-            const totalRecords = data.length;
-            const avgIntensity = data.reduce((sum, item) => sum + item.lux, 0) / totalRecords || 0;
-            const autoActivations = data.filter(item => item.mode === 'auto' && item.relay_status).length;
-            const manualActivations = data.filter(item => item.mode === 'manual' && item.relay_status).length;
-
-            return res.status(200).json({
-                success: true,
-                data: {
-                    totalRecords,
-                    avgIntensity: parseFloat(avgIntensity.toFixed(2)),
-                    autoActivations,
-                    manualActivations
-                }
-            });
-
-        } catch (error) {
-            console.error('Error getting statistics:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Terjadi kesalahan saat mengambil statistik',
-                error: error.message
-            });
-        }
-    },
-
-    /**
-     * Get activity log
-     * GET /api/iot/activity
-     */
-    async getActivityLog(req, res) {
-        try {
-            const limit = parseInt(req.query.limit) || 10;
-
-            const data = await SensorData.findAll({
-                limit,
-                order: [['createdAt', 'DESC']]
-            });
-
-            const activityLog = data.map(item => {
-                let action = '';
-                let status = 'info';
-
-                if (item.mode === 'auto') {
-                    action = item.relay_status ? 'Relay dinyalakan otomatis' : 'Relay dimatikan otomatis';
-                    status = 'success';
-                } else {
-                    action = item.relay_status ? 'Relay dinyalakan manual' : 'Mode diubah ke MANUAL';
-                    status = 'info';
-                }
-
-                return {
-                    time: new Date(item.createdAt).toLocaleTimeString('id-ID', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    action,
-                    status,
-                    timestamp: item.createdAt
-                };
-            });
-
-            return res.status(200).json({
-                success: true,
-                data: activityLog
-            });
-
-        } catch (error) {
-            console.error('Error getting activity log:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Terjadi kesalahan saat mengambil activity log',
-                error: error.message
-            });
-        }
-    },
-
-    /**
-     * Clear all history data
-     * DELETE /api/iot/history
-     */
-    async clearHistory(req, res) {
-        try {
-            const latestData = await SensorData.findOne({
-                order: [['createdAt', 'DESC']]
-            });
-
-            if (latestData) {
-                await SensorData.destroy({
-                    where: {
-                        id: {
-                            [Op.ne]: latestData.id
-                        }
-                    }
-                });
-            }
-
-            console.log('🗑️ History cleared');
-
-            return res.status(200).json({
-                success: true,
-                message: 'Riwayat data berhasil dihapus'
-            });
-
-        } catch (error) {
-            console.error('Error clearing history:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Terjadi kesalahan saat menghapus riwayat',
                 error: error.message
             });
         }

@@ -38,6 +38,12 @@ module.exports = {
                 defaultValue: 500,
                 comment: 'Lux threshold untuk matikan lampu (terang)'
             },
+            manual_relay_state: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
+                comment: 'Manual relay state untuk mode MANUAL'
+            },
             createdAt: {
                 type: Sequelize.DATE,
                 allowNull: false,
