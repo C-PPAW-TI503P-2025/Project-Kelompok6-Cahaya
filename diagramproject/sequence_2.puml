@@ -15,15 +15,15 @@ skinparam participantFontSize 11
 
 
 User -> React: Click "ON" on Dashboard
-React -> Node.js: POST /api/relay/control\n{device_id: "ESP32_001", status: "ON"}
-Node.js -> MySQL: INSERT INTO relay_logs\n(type: 'manual', status: 'ON')
+React -> Node.js: PUT /api/iot/settings\n{mode: "manual", manual_relay_state: true}
+Node.js -> MySQL: UPDATE sensor_data\n(mode: 'manual', manual_relay_state: true)
 Node.js --> React: {success: true}
 
-React --> React: Update UI (Relay ON)
+React --> React: Update UI (Mode: MANUAL, Relay ON)
 
 note right
-  ESP32 polls API or uses
-  WebSocket to receive
-  manual override command
+  ESP32 polls /api/iot/settings
+  to get current mode and
+  manual_relay_state
 end note
 @enduml

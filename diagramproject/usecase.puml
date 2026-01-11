@@ -23,17 +23,17 @@ skinparam ranksep 40
 ' Actors
 actor "Admin" as admin
 actor "User" as user
-actor "IoT Device" as iot
+actor "ESP32\n(BH1750)" as iot
 
 ' System boundary
-rectangle "Sistem Informasi\nTemperature Humidity\nBerbasis Web" {
+rectangle "Sistem Monitoring\nLight Intensity (Lux)\nBerbasis Web" {
   
   ' Use Cases
-  usecase "Kelola Perangkat\nIoT" as UC1
-  usecase "Kelola User" as UC2
-  usecase "Melihat Data\nHistoris" as UC3
-  usecase "Monitoring\nTemperature Humidity" as UC4
-  usecase "Kirim Data\nSensor" as UC5
+  usecase "Kelola User" as UC1
+  usecase "Melihat Data\nHistoris" as UC2
+  usecase "Monitoring\nLux & Relay" as UC3
+  usecase "Konfigurasi\nMode & Threshold" as UC4
+  usecase "Kirim Data\nSensor (Lux)" as UC5
   
   ' Authentication
   usecase "Login" as login
@@ -44,18 +44,18 @@ rectangle "Sistem Informasi\nTemperature Humidity\nBerbasis Web" {
 admin --> UC1
 admin --> UC2
 admin --> UC3
+admin --> UC4
 
+user --> UC2
 user --> UC3
-user --> UC4
 
 iot --> UC5
 
-' Include relationships - all use cases include Login
+' Include relationships - all use cases include Login (except IoT)
 UC1 ..> login : <<include>>
 UC2 ..> login : <<include>>
 UC3 ..> login : <<include>>
 UC4 ..> login : <<include>>
-UC5 ..> login : <<include>>
 
 ' Extend relationship - Logout extends Login
 logout ..> login : <<extend>>

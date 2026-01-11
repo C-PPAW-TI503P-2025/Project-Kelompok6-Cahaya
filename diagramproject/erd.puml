@@ -17,66 +17,35 @@ skinparam ranksep 50
 entity "users" as users {
   * id : INT <<PK>>
   --
-  username : VARCHAR(50) <<UNIQUE>>
-  password_hash : VARCHAR(255)
+  name : VARCHAR(100)
+  email : VARCHAR(100) <<UNIQUE>>
+  password : VARCHAR(255)
   role : ENUM('admin','user')
-  created_at : DATETIME
+  createdAt : DATETIME
+  updatedAt : DATETIME
 }
 
-entity "devices" as devices {
+entity "sensor_data" as sensor_data {
   * id : INT <<PK>>
-  * device_id : VARCHAR(50) <<UNIQUE>>
   --
-  device_name : VARCHAR(100)
-  location : VARCHAR(200)
-  ip_address : VARCHAR(45)
-  status : ENUM('online','offline')
-  last_seen : DATETIME
-  created_at : DATETIME
+  lux : FLOAT
+  relay_status : BOOLEAN
+  mode : ENUM('auto','manual')
+  threshold_low : INT
+  threshold_high : INT
+  manual_relay_state : BOOLEAN
+  createdAt : DATETIME
+  updatedAt : DATETIME
 }
 
-entity "device_settings" as settings {
-  * id : INT <<PK>>
-  * device_id : VARCHAR(50) <<UNIQUE, FK>>
-  --
-  threshold_on : INT
-  threshold_off : INT
-  auto_mode : BOOLEAN
-  updated_at : DATETIME
-}
+note right of sensor_data
+  Menyimpan data sensor BH1750
+  dan konfigurasi twilight switch
+end note
 
-entity "sensor_logs" as sensor_logs {
-  * id : INT <<PK>>
-  * device_id : VARCHAR(50) <<FK>>
-  --
-  lux_value : FLOAT
-  temperature : FLOAT
-  humidity : FLOAT
-  timestamp : DATETIME
-}
+note right of users
+  Menyimpan data user
+  untuk authentication
+end note
 
-entity "relay_logs" as relay_logs {
-  * id : INT <<PK>>
-  * device_id : VARCHAR(50) <<FK>>
-  --
-  relay_status : ENUM('ON','OFF')
-  trigger_type : ENUM('auto','manual')
-  triggered_by : VARCHAR(100)
-  timestamp : DATETIME
-}
-
-entity "notifications" as notifications {
-  * id : INT <<PK>>
-  * device_id : VARCHAR(50) <<FK>>
-  --
-  message : TEXT
-  type : ENUM('info','warning','error')
-  is_read : BOOLEAN
-  created_at : DATETIME
-}
-
-devices ||--o{ sensor_logs : "1:N"
-devices ||--o{ relay_logs : "1:N"
-devices ||--|| settings : "1:1"
-devices ||--o{ notifications : "1:N"
 @enduml

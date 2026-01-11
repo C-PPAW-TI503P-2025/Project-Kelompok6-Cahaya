@@ -25,8 +25,9 @@ package "Client Layer" {
 
 package "Server Layer" {
     [Backend API (Express.js)] as api
-    [Auth Service] as auth
-    [Data Processing] as processor
+    [Auth Service (JWT)] as auth
+    [IoT Controller] as iot_ctrl
+    [User Controller] as user_ctrl
 }
 
 package "Database Layer" {
@@ -39,13 +40,14 @@ package "IoT Layer" {
     [Actuator (Relay)] as relay
 }
 
-client <--> api : HTTP/REST / WebSocket
+client <--> api : HTTP/REST API
 api --> db : SQL Query
-iot --> api : HTTP POST / MQTT
-iot -- sensor : Read Data
-iot -- relay : Control
+iot --> api : HTTP POST /api/iot/data
+iot -- sensor : Read Lux Data
+iot -- relay : Control ON/OFF
 
-api -down-> auth : Validate
-api -down-> processor : Process Data
+api -down-> auth : JWT Validation
+api -down-> iot_ctrl : Process Sensor Data
+api -down-> user_ctrl : Manage Users
 
 @enduml
