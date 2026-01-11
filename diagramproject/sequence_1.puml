@@ -1,0 +1,79 @@
+@startuml
+skinparam monochrome true
+skinparam padding 6
+skinparam BackgroundColor white
+skinparam participantBackgroundColor white
+skinparam participantBorderColor black
+skinparam ArrowColor black
+skinparam SequenceLifeLineBorderColor black
+skinparam SequenceGroupBackgroundColor white
+skinparam SequenceGroupBorderColor black
+skinparam boxBackgroundColor white
+skinparam boxBorderColor black
+skinparam participantPadding 15
+skinparam boxPadding 10
+skinparam ArrowThickness 2
+skinparam Shadowing false
+skinparam participantFontSize 11
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 150
+
+title Auto Light System (BH1750 + Database + Web Dashboard)
+
+box "IoT Layer"
+participant "Sensor\nBH1750" as BH1750
+participant "IoT Device\n(ESP32/ESP8266)" as ESP32
+participant Relay
+end box
+
+box "Server Side"
+participant "Node.js\nExpress.js API" as API
+participant "Data Processing\nService" as DPS
+end box
+
+box "Database Layer"
+participant "MySQL\nDatabase" as MySQL
+end box
+
+box "Client Side"
+participant "React.js\nFrontend UI" as WEB
+participant "Web Browser" as Browser
+end box
+
+== Auto Mode (Local Control) ==
+ESP32 -> BH1750: readLux()
+BH1750 --> ESP32: lux value
+
+alt lux < threshold (300)
+    ESP32 -> Relay: TURN ON
+else lux >= threshold
+    ESP32 -> Relay: TURN OFF
+end
+
+== Send Data to Server ==
+ESP32 -> API: POST /api/sensor/log\n(HTTP/MQTT)\n{ lux, relay_status }
+API -> DPS: Proses Data Sensor
+DPS -> MySQL: INSERT sensor_logs\n(Query/Response Data)
+MySQL --> DPS: confirmation
+DPS --> API: success
+API --> ESP32: JSON Response
+
+== Monitoring ==
+Browser -> WEB: Akses Web UI
+WEB -> API: GET /api/sensor/logs\n(HTTP/HTTPS Request - JSON REST API)
+API -> DPS: Request Data
+DPS -> MySQL: SELECT sensor_logs\n(Query/Response Data)
+MySQL --> DPS: data
+DPS --> API: processed data
+API --> WEB: JSON Response
+WEB --> Browser: Tampilkan Grafik\n& Tabel Data
+
+note right of ESP32
+Local automatic control
+does NOT depend on cloud.
+Cloud is used only
+for logging & monitoring.
+end note
+
+@enduml

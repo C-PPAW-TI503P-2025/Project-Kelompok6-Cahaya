@@ -1,0 +1,51 @@
+@startuml
+skinparam packageStyle rectangle
+skinparam padding 6
+skinparam BackgroundColor white
+skinparam componentBackgroundColor white
+skinparam componentBorderColor black
+skinparam packageBackgroundColor white
+skinparam packageBorderColor black
+skinparam databaseBackgroundColor white
+skinparam databaseBorderColor black
+skinparam ArrowColor black
+skinparam componentPadding 10
+skinparam packagePadding 15
+skinparam ArrowThickness 2
+skinparam Shadowing false
+skinparam componentFontSize 12
+skinparam packageFontSize 13
+skinparam databaseFontSize 12
+skinparam nodesep 20
+skinparam ranksep 30
+
+package "Client Layer" {
+    [Web Browser (React.js)] as client
+}
+
+package "Server Layer" {
+    [Backend API (Express.js)] as api
+    [Auth Service] as auth
+    [Data Processing] as processor
+}
+
+package "Database Layer" {
+    database "MySQL" as db
+}
+
+package "IoT Layer" {
+    [ESP32 Device] as iot
+    [Sensor (BH1750)] as sensor
+    [Actuator (Relay)] as relay
+}
+
+client <--> api : HTTP/REST / WebSocket
+api --> db : SQL Query
+iot --> api : HTTP POST / MQTT
+iot -- sensor : Read Data
+iot -- relay : Control
+
+api -down-> auth : Validate
+api -down-> processor : Process Data
+
+@enduml

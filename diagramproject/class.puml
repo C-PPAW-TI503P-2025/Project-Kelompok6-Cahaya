@@ -1,0 +1,71 @@
+@startuml
+skinparam padding 6
+skinparam BackgroundColor white
+skinparam classBackgroundColor white
+skinparam classBorderColor black
+skinparam ArrowColor black
+skinparam classPadding 10
+skinparam ArrowThickness 2
+skinparam Shadowing false
+skinparam classFontSize 11
+skinparam classAttributeFontSize 10
+skinparam nodesep 30
+skinparam ranksep 50
+
+class Device {
+  +id: int
+  +device_id: string
+  +device_name: string
+  +location: string
+  +ip_address: string
+  +status: string
+  +last_seen: datetime
+}
+
+class SensorLog {
+  +id: int
+  +device_id: string
+  +lux_value: float
+  +temperature: float
+  +humidity: float
+  +timestamp: datetime
+}
+
+class RelayLog {
+  +id: int
+  +device_id: string
+  +relay_status: string
+  +trigger_type: string
+  +triggered_by: string
+  +timestamp: datetime
+}
+
+class DeviceSetting {
+  +id: int
+  +device_id: string
+  +threshold_on: int
+  +threshold_off: int
+  +auto_mode: boolean
+  +updated_at: datetime
+}
+
+class User {
+  +id: int
+  +username: string
+  +password_hash: string
+  +role: string
+}
+
+class Notification {
+  +id: int
+  +device_id: string
+  +message: string
+  +type: string
+  +is_read: boolean
+  +created_at: datetime
+}
+
+Device "1" -- "many" SensorLog
+Device "1" -- "many" RelayLog
+Device "1" -- "1" DeviceSetting
+@enduml

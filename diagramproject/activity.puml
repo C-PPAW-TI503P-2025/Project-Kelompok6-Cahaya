@@ -1,0 +1,124 @@
+@startuml
+skinparam monochrome true
+skinparam padding 4
+skinparam BackgroundColor white
+skinparam ActivityBackgroundColor white
+skinparam ActivityBorderColor black
+skinparam ActivityDiamondBackgroundColor white
+skinparam ActivityDiamondBorderColor black
+skinparam ActivityStartColor black
+skinparam ActivityEndColor black
+skinparam ActivityBarColor black
+skinparam ArrowColor black
+skinparam PartitionBackgroundColor white
+skinparam PartitionBorderColor black
+skinparam ActivityBorderThickness 2
+skinparam ArrowThickness 2
+skinparam Shadowing false
+skinparam ActivityFontSize 12
+skinparam PartitionBorderThickness 2
+
+title Activity Diagram - Monitoring Temperature Humidity (Terpadu)
+
+|User|
+start
+:Buka aplikasi web;
+:Klik tombol Login;
+
+|Sistem|
+:Tampilkan form login;
+
+|User|
+:Input username & password;
+:Submit form;
+
+|Sistem|
+:Validasi kredensial;
+
+if (Kredensial valid?) then (Ya)
+  :Generate JWT token;
+  :Simpan session;
+  :Redirect ke dashboard;
+else (Tidak)
+  :Tampilkan error message;
+  stop
+endif
+
+|User|
+:Pilih menu "Monitoring Temperature Humidity";
+
+|Sistem|
+:Request data sensor ke API;
+
+|Backend API|
+:Query tabel sensor_logs;
+:Ambil data terbaru (temperature, humidity);
+
+|Database|
+:Return data sensor;
+
+|Backend API|
+:Format data ke JSON;
+:Kirim response ke frontend;
+
+|Sistem|
+:Render grafik & nilai real-time;
+:Tampilkan di dashboard;
+
+|User|
+if (Ingin lihat historis?) then (Ya)
+  :Pilih rentang tanggal;
+  
+  |Sistem|
+  :Request data historis;
+  
+  |Backend API|
+  :Query sensor_logs dengan filter tanggal;
+  
+  |Database|
+  :Return data historis;
+  
+  |Backend API|
+  :Kirim data ke frontend;
+  
+  |Sistem|
+  :Tampilkan grafik historis;
+  :Tampilkan tabel data;
+else (Tidak)
+  :Tetap di halaman monitoring;
+endif
+
+|User|
+if (User = Admin?) then (Ya)
+  if (Ingin kelola perangkat?) then (Ya)
+    :Pilih menu "Kelola Perangkat IoT";
+    
+    |Sistem|
+    :Tampilkan daftar perangkat;
+    
+    |User|
+    :Pilih aksi (Tambah/Edit/Hapus);
+    :Submit perubahan;
+    
+    |Backend API|
+    :Validasi data;
+    :Update tabel devices;
+    
+    |Database|
+    :Simpan perubahan;
+    
+    |Sistem|
+    :Tampilkan notifikasi sukses;
+  endif
+endif
+
+|User|
+:Klik Logout;
+
+|Sistem|
+:Hapus session & token;
+:Redirect ke halaman login;
+
+stop
+
+@enduml

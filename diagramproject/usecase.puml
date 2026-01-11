@@ -1,0 +1,63 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam padding 6
+skinparam BackgroundColor white
+skinparam usecaseBackgroundColor white
+skinparam usecaseBorderColor black
+skinparam actorBorderColor black
+skinparam packageBackgroundColor white
+skinparam packageBorderColor black
+skinparam ArrowColor black
+skinparam usecasePadding 15
+skinparam packagePadding 20
+skinparam actorPadding 10
+skinparam ArrowThickness 2
+skinparam Shadowing false
+skinparam usecaseFontSize 11
+skinparam actorFontSize 12
+skinparam packageFontSize 13
+skinparam nodesep 25
+skinparam ranksep 40
+
+' Actors
+actor "Admin" as admin
+actor "User" as user
+actor "IoT Device" as iot
+
+' System boundary
+rectangle "Sistem Informasi\nTemperature Humidity\nBerbasis Web" {
+  
+  ' Use Cases
+  usecase "Kelola Perangkat\nIoT" as UC1
+  usecase "Kelola User" as UC2
+  usecase "Melihat Data\nHistoris" as UC3
+  usecase "Monitoring\nTemperature Humidity" as UC4
+  usecase "Kirim Data\nSensor" as UC5
+  
+  ' Authentication
+  usecase "Login" as login
+  usecase "Logout" as logout
+}
+
+' Actor to Use Case Relationships
+admin --> UC1
+admin --> UC2
+admin --> UC3
+
+user --> UC3
+user --> UC4
+
+iot --> UC5
+
+' Include relationships - all use cases include Login
+UC1 ..> login : <<include>>
+UC2 ..> login : <<include>>
+UC3 ..> login : <<include>>
+UC4 ..> login : <<include>>
+UC5 ..> login : <<include>>
+
+' Extend relationship - Logout extends Login
+logout ..> login : <<extend>>
+
+@enduml

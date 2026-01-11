@@ -1,0 +1,29 @@
+@startuml
+skinparam monochrome true
+skinparam padding 6
+skinparam BackgroundColor white
+skinparam participantBackgroundColor white
+skinparam participantBorderColor black
+skinparam ArrowColor black
+skinparam SequenceLifeLineBorderColor black
+skinparam SequenceGroupBackgroundColor white
+skinparam SequenceGroupBorderColor black
+skinparam participantPadding 15
+skinparam ArrowThickness 2
+skinparam Shadowing false
+skinparam participantFontSize 11
+
+
+User -> React: Click "ON" on Dashboard
+React -> Node.js: POST /api/relay/control\n{device_id: "ESP32_001", status: "ON"}
+Node.js -> MySQL: INSERT INTO relay_logs\n(type: 'manual', status: 'ON')
+Node.js --> React: {success: true}
+
+React --> React: Update UI (Relay ON)
+
+note right
+  ESP32 polls API or uses
+  WebSocket to receive
+  manual override command
+end note
+@enduml

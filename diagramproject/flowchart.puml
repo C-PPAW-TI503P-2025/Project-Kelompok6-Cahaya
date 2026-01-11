@@ -1,0 +1,77 @@
+@startuml
+skinparam padding 4
+skinparam BackgroundColor white
+skinparam ActivityBackgroundColor white
+skinparam ActivityBorderColor black
+skinparam ActivityDiamondBackgroundColor white
+skinparam ActivityDiamondBorderColor black
+skinparam ArrowColor black
+skinparam ActivityBorderThickness 2
+skinparam ArrowThickness 2
+skinparam Shadowing false
+skinparam ActivityFontSize 12
+
+title Flowchart Sistem Monitoring Temperature Humidity
+
+start
+
+:User membuka aplikasi;
+
+if (Sudah login?) then (Tidak)
+  :Tampilkan halaman login;
+  :User input username & password;
+  
+  if (Kredensial valid?) then (Tidak)
+    :Tampilkan pesan error;
+    stop
+  else (Ya)
+    :Autentikasi berhasil;
+    :Generate session token;
+  endif
+else (Ya)
+  :Load dashboard;
+endif
+
+:Tampilkan menu utama;
+
+if (User memilih menu?) then (Monitoring Real-time)
+  :Ambil data sensor terbaru;
+  :Tampilkan temperature & humidity;
+  :Update grafik real-time;
+  
+elseif (Lihat Data Historis) then
+  :User pilih rentang waktu;
+  :Query database sensor_logs;
+  :Tampilkan grafik & tabel historis;
+  
+elseif (Kelola Perangkat IoT) then
+  if (User = Admin?) then (Ya)
+    :Tampilkan daftar perangkat;
+    :User pilih aksi (tambah/edit/hapus);
+    :Update database devices;
+    :Tampilkan konfirmasi;
+  else (Tidak)
+    :Tampilkan pesan "Akses ditolak";
+  endif
+  
+elseif (Kelola User) then
+  if (User = Admin?) then (Ya)
+    :Tampilkan daftar user;
+    :User pilih aksi (tambah/edit/hapus);
+    :Update database users;
+    :Tampilkan konfirmasi;
+  else (Tidak)
+    :Tampilkan pesan "Akses ditolak";
+  endif
+  
+elseif (Logout) then
+  :Hapus session token;
+  :Redirect ke halaman login;
+  stop
+endif
+
+:Kembali ke menu utama;
+
+stop
+
+@enduml
