@@ -33,4 +33,13 @@ router.put('/settings', iotController.updateSettings);
 // POST /api/iot/relay - Manual relay control (hanya untuk mode MANUAL)
 router.post('/relay', iotController.controlRelay);
 
+// GET /api/iot/statistics - Get statistics summary
+router.get('/statistics', iotController.getStatistics);
+
+// GET /api/iot/activity - Get activity log
+router.get('/activity', iotController.getActivityLog);
+
+// DELETE /api/iot/history - Clear all history data
+router.delete('/history', iotController.clearHistory);
+
 module.exports = router;
