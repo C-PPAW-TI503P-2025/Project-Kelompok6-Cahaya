@@ -1,0 +1,25 @@
+.app-container {
+    min-height: 100vh;
+    background-color: #f5f7fa;
+}
+
+.main-content {
+    display: flex;
+}
+
+.content-area {
+    flex: 1;
+    padding: 24px;
+    min-height: calc(100vh - 64px);
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .content-area {
+        padding: 16px;
+    }
+}
