@@ -1,0 +1,171 @@
+.relay-control {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #667eea;
+}
+
+.relay-header h3 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.relay-status {
+    margin-bottom: 20px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+}
+
+.status-indicator.on {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-indicator.off {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.status-light {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.on .status-light {
+    background-color: #4caf50;
+    box-shadow: 0 0 10px #4caf50;
+}
+
+.status-indicator.off .status-light {
+    background-color: #f44336;
+    box-shadow: 0 0 10px #f44336;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.status-indicator span {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.mode-selector {
+    margin-bottom: 20px;
+}
+
+.mode-selector label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #666;
+}
+
+.mode-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.mode-btn:hover:not(:disabled) {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.mode-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.mode-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.relay-toggle {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+}
+
+.relay-toggle.on {
+    background: #f44336;
+    color: white;
+}
+
+.relay-toggle.off {
+    background: #4caf50;
+    color: white;
+}
+
+.relay-toggle:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.relay-toggle:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.relay-message {
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.relay-message.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.relay-message.error {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.relay-info {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+}

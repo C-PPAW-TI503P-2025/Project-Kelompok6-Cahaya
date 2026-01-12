@@ -18,7 +18,7 @@ skinparam Shadowing false
 skinparam ActivityFontSize 12
 skinparam PartitionBorderThickness 2
 
-title Activity Diagram - Monitoring Temperature Humidity (Terpadu)
+title Activity Diagram - Monitoring Light Intensity (Lux) & Relay Control
 
 |User|
 start
@@ -45,14 +45,14 @@ else (Tidak)
 endif
 
 |User|
-:Pilih menu "Monitoring Temperature Humidity";
+:Pilih menu "Monitoring Lux & Relay";
 
 |Sistem|
 :Request data sensor ke API;
 
 |Backend API|
-:Query tabel sensor_logs;
-:Ambil data terbaru (temperature, humidity);
+:Query tabel sensor_data;
+:Ambil data terbaru (lux, relay_status);
 
 |Database|
 :Return data sensor;
@@ -62,7 +62,7 @@ endif
 :Kirim response ke frontend;
 
 |Sistem|
-:Render grafik & nilai real-time;
+:Render grafik lux & status relay;
 :Tampilkan di dashboard;
 
 |User|
@@ -73,7 +73,7 @@ if (Ingin lihat historis?) then (Ya)
   :Request data historis;
   
   |Backend API|
-  :Query sensor_logs dengan filter tanggal;
+  :Query sensor_data dengan filter tanggal;
   
   |Database|
   :Return data historis;
@@ -90,19 +90,20 @@ endif
 
 |User|
 if (User = Admin?) then (Ya)
-  if (Ingin kelola perangkat?) then (Ya)
-    :Pilih menu "Kelola Perangkat IoT";
+  if (Ingin ubah settings?) then (Ya)
+    :Pilih menu "Settings";
     
     |Sistem|
-    :Tampilkan daftar perangkat;
+    :Tampilkan form mode & threshold;
     
     |User|
-    :Pilih aksi (Tambah/Edit/Hapus);
+    :Ubah mode (AUTO/MANUAL);
+    :Ubah threshold lux;
     :Submit perubahan;
     
     |Backend API|
     :Validasi data;
-    :Update tabel devices;
+    :Update settings di sensor_data;
     
     |Database|
     :Simpan perubahan;

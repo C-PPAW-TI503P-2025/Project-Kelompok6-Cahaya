@@ -1,0 +1,59 @@
+.sensor-card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
+}
+
+.sensor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.sensor-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.sensor-icon {
+    font-size: 32px;
+}
+
+.sensor-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #666;
+    font-weight: 600;
+}
+
+.sensor-value {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.sensor-value .value {
+    font-size: 36px;
+    font-weight: 700;
+    color: #333;
+}
+
+.sensor-value .unit {
+    font-size: 18px;
+    color: #999;
+    font-weight: 500;
+}
+
+.sensor-level {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 12px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    display: inline-block;
+}

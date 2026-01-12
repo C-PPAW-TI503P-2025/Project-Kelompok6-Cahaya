@@ -11,7 +11,7 @@ skinparam ArrowThickness 2
 skinparam Shadowing false
 skinparam ActivityFontSize 12
 
-title Flowchart Sistem Monitoring Temperature Humidity
+title Flowchart Sistem Monitoring Light Intensity (Lux)
 
 start
 
@@ -36,19 +36,20 @@ endif
 
 if (User memilih menu?) then (Monitoring Real-time)
   :Ambil data sensor terbaru;
-  :Tampilkan temperature & humidity;
+  :Tampilkan lux & relay status;
   :Update grafik real-time;
   
 elseif (Lihat Data Historis) then
   :User pilih rentang waktu;
-  :Query database sensor_logs;
+  :Query database sensor_data;
   :Tampilkan grafik & tabel historis;
   
-elseif (Kelola Perangkat IoT) then
+elseif (Settings) then
   if (User = Admin?) then (Ya)
-    :Tampilkan daftar perangkat;
-    :User pilih aksi (tambah/edit/hapus);
-    :Update database devices;
+    :Tampilkan form settings;
+    :User ubah mode (AUTO/MANUAL);
+    :User ubah threshold lux;
+    :Update database sensor_data;
     :Tampilkan konfirmasi;
   else (Tidak)
     :Tampilkan pesan "Akses ditolak";
