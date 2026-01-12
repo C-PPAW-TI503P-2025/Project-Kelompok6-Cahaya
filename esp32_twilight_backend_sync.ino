@@ -1,12 +1,3 @@
-/*
- * =====================================================
- * ESP32 TWILIGHT SWITCH - BACKEND SYNC
- * =====================================================
- * Relay dikontrol 100% oleh BACKEND
- * ESP32 hanya kirim data lux dan terima perintah relay
- * =====================================================
- */
-
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Wire.h>
@@ -18,13 +9,13 @@ const char* ssid     = "Galaxy A54 5G FEB7";
 const char* password = "12345678";
 
 /* ================= SERVER =============== */
-String dataUrl     = "http://10.228.186.151:3000/api/iot/data";
-String settingsUrl = "http://10.228.186.151:3000/api/iot/settings";
+String dataUrl     = "http://10.190.173.151:3000/api/iot/data";
+String settingsUrl = "http://10.190.173.151:3000/api/iot/settings";
 
 /* ================= PIN ================== */
 #define SDA_PIN   17
 #define SCL_PIN   16
-#define RELAY_PIN 25
+#define RELAY_PIN 26
 
 /* ================= SENSOR =============== */
 BH1750 lightMeter;
@@ -33,13 +24,13 @@ BH1750 lightMeter;
 float lux = 0;
 bool relayState = false;
 String mode = "auto";
-int luxThreshold = 100;
+int luxThreshold = 200;  // Default threshold
 
 unsigned long lastSend = 0;
 unsigned long lastGet  = 0;
 
-#define SEND_INTERVAL     3000   // Kirim data setiap 5 detik
-#define SETTINGS_INTERVAL 5000  // Cek settings setiap 10 detik
+#define SEND_INTERVAL     3000   // Kirim data setiap 3 detik
+#define SETTINGS_INTERVAL 5000   // Cek settings setiap 5 detik
 
 /* ================================================= */
 void setup() {
@@ -48,13 +39,13 @@ void setup() {
 
   Serial.println("\n=================================");
   Serial.println("ESP32 TWILIGHT SWITCH");
-  Serial.println("Backend Sync Mode");
+  Serial.println("Backend Sync Mode v2.0");
   Serial.println("=================================\n");
 
   // Setup relay pin
   pinMode(RELAY_PIN, OUTPUT);
-  digitalWrite(RELAY_PIN, LOW); // RELAY OFF (ACTIVE HIGH)
-  Serial.println("✅ Relay initialized (OFF)");
+  digitalWrite(RELAY_PIN, HIGH); // ACTIVE LOW: HIGH = OFF (Lampu MATI)
+  Serial.println("✅ Relay initialized (OFF - Lampu MATI)");
 
   // Setup I2C untuk BH1750
   Wire.begin(SDA_PIN, SCL_PIN);
@@ -176,19 +167,33 @@ void readSensorAndSend() {
     // Parse response dari backend
     String response = http.getString();
     
-    StaticJsonDocument<512> doc;
+    StaticJsonDocument<1024> doc;
     DeserializationError error = deserializeJson(doc, response);
 
-    if (!error && doc.containsKey("relay_state")) {
-      bool newRelayState = doc["relay_state"];
+    if (!error) {
+      // Backend response structure:
+      // { "success": true, "relay_state": bool, "mode": "auto/manual", ... }
       
-      Serial.print("🔧 Backend says: Relay should be ");
-      Serial.println(newRelayState ? "ON" : "OFF");
-      
-      // Update relay sesuai perintah backend
-      setRelay(newRelayState);
+      if (doc.containsKey("relay_state")) {
+        bool newRelayState = doc["relay_state"];
+        String backendMode = doc["mode"].as<String>();
+        
+        Serial.print("🔧 Backend says: Mode=");
+        Serial.print(backendMode);
+        Serial.print(", Relay=");
+        Serial.println(newRelayState ? "ON" : "OFF");
+        
+        // Update mode lokal
+        mode = backendMode;
+        
+        // Update relay sesuai perintah backend
+        setRelay(newRelayState);
+      } else {
+        Serial.println("⚠️  No relay_state in response");
+      }
     } else {
-      Serial.println("⚠️  No relay_state in response");
+      Serial.print("⚠️  JSON parse error: ");
+      Serial.println(error.c_str());
     }
 
   } else {
@@ -212,33 +217,56 @@ void getSettings() {
   if (code == 200) {
     String response = http.getString();
     
-    StaticJsonDocument<256> doc;
+    StaticJsonDocument<512> doc;
     DeserializationError error = deserializeJson(doc, response);
 
     if (!error) {
-      String newMode = doc["mode"].as<String>();
-      int newThreshold = doc["lux_threshold"];
-      bool manualState = doc["manual_relay_state"];
+      // Backend response structure:
+      // { "success": true, "data": { "mode": "auto", "lux_threshold": 200, "manual_relay_state": false } }
+      
+      if (doc.containsKey("data")) {
+        JsonObject data = doc["data"];
+        
+        String newMode = data["mode"].as<String>();
+        int newThreshold = data["lux_threshold"];
+        bool manualState = data["manual_relay_state"];
 
-      // Update settings lokal
-      if (newMode != mode || newThreshold != luxThreshold) {
-        mode = newMode;
-        luxThreshold = newThreshold;
+        // Update settings lokal
+        bool settingsChanged = false;
         
-        Serial.println("\n⚙️  SETTINGS UPDATED");
-        Serial.print("   Mode: ");
-        Serial.println(mode);
-        Serial.print("   Threshold: ");
-        Serial.println(luxThreshold);
+        if (newMode != mode) {
+          mode = newMode;
+          settingsChanged = true;
+        }
         
-        // Jika mode manual, update relay
-        if (mode == "manual") {
-          Serial.print("   Manual State: ");
-          Serial.println(manualState ? "ON" : "OFF");
-          setRelay(manualState);
+        if (newThreshold != luxThreshold) {
+          luxThreshold = newThreshold;
+          settingsChanged = true;
+        }
+        
+        if (settingsChanged) {
+          Serial.println("\n⚙️  SETTINGS UPDATED");
+          Serial.print("   Mode: ");
+          Serial.println(mode);
+          Serial.print("   Threshold: ");
+          Serial.print(luxThreshold);
+          Serial.println(" lux");
+          
+          // Jika mode manual, update relay sesuai manual_relay_state
+          if (mode == "manual") {
+            Serial.print("   Manual State: ");
+            Serial.println(manualState ? "ON" : "OFF");
+            setRelay(manualState);
+          }
         }
       }
+    } else {
+      Serial.print("⚠️  Settings JSON parse error: ");
+      Serial.println(error.c_str());
     }
+  } else if (code > 0) {
+    Serial.print("⚠️  Settings GET failed: ");
+    Serial.println(code);
   }
 
   http.end();
@@ -249,13 +277,20 @@ void setRelay(bool state) {
   if (state != relayState) {
     relayState = state;
     
-    // ACTIVE HIGH: true=HIGH (ON), false=LOW (OFF)
-    // Relay Anda nyala saat HIGH, mati saat LOW
-    digitalWrite(RELAY_PIN, state ? HIGH : LOW);
+    // ⚠️ ACTIVE LOW: Relay module dengan optocoupler biasanya ACTIVE LOW
+    // true (ON)  = LOW  → Relay tertutup, lampu NYALA
+    // false (OFF) = HIGH → Relay terbuka, lampu MATI
+    // 
+    // Jika relay Anda ACTIVE HIGH (jarang), ubah menjadi:
+    // digitalWrite(RELAY_PIN, state ? HIGH : LOW);
+    
+    digitalWrite(RELAY_PIN, state ? LOW : HIGH);  // ACTIVE LOW
     
     Serial.println("\n🔄 *** RELAY CHANGED ***");
     Serial.print("   Relay is now: ");
-    Serial.println(state ? "ON ⚡" : "OFF 💤");
+    Serial.println(state ? "ON ⚡ (Lampu NYALA)" : "OFF 💤 (Lampu MATI)");
+    Serial.print("   GPIO Pin: ");
+    Serial.println(state ? "LOW" : "HIGH");
     Serial.println("   *********************");
   }
 }

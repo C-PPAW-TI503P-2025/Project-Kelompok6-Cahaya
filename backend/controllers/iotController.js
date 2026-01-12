@@ -369,8 +369,15 @@ const iotController = {
                 order: [['createdAt', 'DESC']]
             });
 
+            if (!latestData) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Tidak ada data sensor. Tunggu ESP32 mengirim data pertama.'
+                });
+            }
+
             // Jika mode AUTO, tidak bisa manual control
-            if (latestData?.mode === 'auto') {
+            if (latestData.mode === 'auto') {
                 return res.status(400).json({
                     success: false,
                     message: 'Tidak bisa kontrol manual saat mode AUTO. Ubah ke mode MANUAL dulu.'
@@ -379,12 +386,25 @@ const iotController = {
 
             console.log(`🔌 Manual relay control: ${status ? 'ON' : 'OFF'}`);
 
+            // Create new record with updated relay status
+            const updatedData = await SensorData.create({
+                lux: latestData.lux,
+                relay_status: status,
+                mode: 'manual', // Ensure mode is manual
+                threshold_low: latestData.threshold_low,
+                threshold_high: latestData.threshold_high || 500,
+                manual_relay_state: status
+            });
+
+            console.log(`✅ Relay state saved to DB: ${status ? 'ON' : 'OFF'}`);
+
             return res.status(200).json({
                 success: true,
                 message: `Relay ${status ? 'ON' : 'OFF'}`,
                 data: {
-                    relay_status: status,
-                    mode: 'manual'
+                    relay_status: updatedData.relay_status,
+                    mode: updatedData.mode,
+                    lux: updatedData.lux
                 }
             });
 
